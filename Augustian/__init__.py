@@ -6,3 +6,5 @@
 # it into this module with the name 'Player':
 
 from Augustian.player import Player
+
+

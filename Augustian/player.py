@@ -1,4 +1,3 @@
-
 class Player:
     def __init__(self, player, n):
         """
@@ -10,6 +9,10 @@ class Player:
         as Blue.
         """
         # put your code here
+        if player == "red":
+            print("I'm red hello?")
+        else:
+            print(2)
 
     def action(self):
         """
@@ -17,7 +20,7 @@ class Player:
         of the game, select an action to play.
         """
         # put your code here
-    
+
     def turn(self, player, action):
         """
         Called at the end of each player's turn to inform this player of 
@@ -30,4 +33,3 @@ class Player:
         above. However, the referee has validated it at this point.
         """
         # put your code here
-
