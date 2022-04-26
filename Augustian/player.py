@@ -19,7 +19,12 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
+        """
+        read the board first everytime when its called
+        then figure out whats the best way
+        """
         # put your code here
+
 
     def turn(self, player, action):
         """
