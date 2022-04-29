@@ -120,17 +120,36 @@ class Player:
         # print("still have this many cells that can be placed", turns_left, len(self.redOccupiedList),len(self.blueOccupiedList))
 
         if self.color == "red":
-            # print("count is ", self.count)
-            cell = self.minimax(1, "red")
+            # print("countis",self.count)
+            if self.count == 0:
+                decision = ('PLACE', 3, 4)
+                self.count += 1
+                s = self.evaluation()
 
-            decision = ('PLACE', cell[0], cell[1])
-            # print(decision)
+            elif self.count == 1:
+                decision = ('PLACE', 1, 4)
+                self.count += 1
+                s = self.evaluation()
+            elif self.count == 2:
+                decision = ('PLACE', 3, 2)
+                self.count += 1
+                # m = self.minimax(2, "red")
+                s=self.evaluation()
+            else:
+                decision = ('PLACE', 0, 0)
+                self.count +=1
+                s = self.evaluation()
 
-        else:
-            # print("count is ", self.count)
-            cell = self.minimax(1, "blue")
-
-            decision = ('PLACE', cell[0], cell[1])
+        elif self.color == "blue":
+            # print("countis",self.count)
+            if self.count == 0:
+                decision = ('PLACE', 2, 3)
+                self.count += 1
+                b = self.evaluation()
+            else:
+                decision = ('PLACE', 2, 4)
+                self.count += 1
+                b = self.evaluation()
 
         return decision
 
@@ -187,11 +206,12 @@ class Player:
             # print(self.blueOccupiedList)
         else:
             self.blueOccupiedList.append([action[1], action[2]])
-            if [action[1], action[2]] in self.blueStartList[0]:
-                self.blueStartList[0].remove([action[1], action[2]])
+
+            if [action[1], action[2]] in self.redStartList[0]:
+                self.redStartList[0].remove([action[1], action[2]])
                 # print("blue list start and goal", self.blueStartList, self.blueGoalList)
-            if [action[1], action[2]] in self.blueStartList[1]:
-                self.blueStartList[1].remove([action[1], action[2]])
+            if [action[1], action[2]] in self.redStartList[1]:
+                self.redStartList[1].remove([action[1], action[2]])
                 # print("blue list start and goal", self.blueStartList, self.blueGoalList)
             # print("blue List recording blue")
             # print(self.blueOccupiedList)
@@ -212,9 +232,9 @@ class Player:
 
         """
 
-        # print("red already occupied", self.redOccupiedList)
+        print("red already occupied", self.redOccupiedList)
         red_score = self.get_shortest_path("red")
-        # print("blue already occupied", self.blueOccupiedList)
+        print("blue already occupied", self.blueOccupiedList)
         blue_score = self.get_shortest_path("blue")
 
         # print("evulating state", blue_score - red_score)
@@ -222,6 +242,7 @@ class Player:
         # by using A* search, work out the shortest path's, get this path's steps, minus already occupied cell number.
         # then get the shortest path number.
 
+        print("evulating state", blue_score - red_score)
         return blue_score - red_score
 
     def minimax(self, depth, maximizingPlayer):
@@ -303,6 +324,7 @@ class Player:
 
             red_path = a_star_search(self.all_nodes, self.redStartList[0][0], self.redGoalList[0][0],
                                      self.blueOccupiedList)
+            # print("start and goal", self.redStartList[0][0], self.redGoalList[0][0])
             final = len(red_path)
             for i in range(self.START_BOUND):
                 # print("length of start length",len(self.redStartList[1]))
@@ -319,7 +341,7 @@ class Player:
                             final = length
                             red_path = temp_path
 
-            # print(red_path)
+            print(red_path)
             # print("final length", final)
             return final
         else:
@@ -334,13 +356,13 @@ class Player:
                         # print("start is ,goal is ", self.blueStartList[i][j], self.blueGoalList[i][k])
                         temp_path = a_star_search(self.all_nodes, self.blueStartList[i][j], self.blueGoalList[i][k],
                                                   self.redOccupiedList)
-                        # print(temp_path)
                         if temp_path is not None:
+                            # print(temp_path)
                             length = length_of_path(temp_path, self.blueOccupiedList)
                         if length < final:
                             final = length
                             blue_path = temp_path
-            # print("best path for blue",blue_path)
+            print("best path for blue", blue_path)
             return final
 
     def get_all_possible_moves(self):
