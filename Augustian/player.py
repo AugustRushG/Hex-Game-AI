@@ -1,4 +1,8 @@
 from Augustian.node import a_star_search
+import time
+
+MAX = 10000
+MIN = -10000
 
 
 def length_of_path(path, occupied):
@@ -21,12 +25,9 @@ class Player:
 
     START_BOUND = 2
     turns_left = 0
-
     color = ""
     boardSize = 0
-
     all_nodes = []
-
     count = 0
 
     def __init__(self, player, n):
@@ -120,36 +121,16 @@ class Player:
         # print("still have this many cells that can be placed", turns_left, len(self.redOccupiedList),len(self.blueOccupiedList))
 
         if self.color == "red":
-            # print("countis",self.count)
-            if self.count == 0:
-                decision = ('PLACE', 3, 4)
-                self.count += 1
-                s = self.evaluation()
-
-            elif self.count == 1:
-                decision = ('PLACE', 1, 4)
-                self.count += 1
-                s = self.evaluation()
-            elif self.count == 2:
-                decision = ('PLACE', 3, 2)
-                self.count += 1
-                # m = self.minimax(2, "red")
-                s=self.evaluation()
-            else:
-                decision = ('PLACE', 0, 0)
-                self.count +=1
-                s = self.evaluation()
+            best_move = self.find_best_move()
+            print(best_move)
+            decision = ('PLACE', best_move[0], best_move[1])
 
         elif self.color == "blue":
             # print("countis",self.count)
-            if self.count == 0:
-                decision = ('PLACE', 2, 3)
-                self.count += 1
-                b = self.evaluation()
-            else:
-                decision = ('PLACE', 2, 4)
-                self.count += 1
-                b = self.evaluation()
+            best_move = self.find_best_move()
+            print(best_move)
+            decision = ('PLACE', best_move[0], best_move[1])
+            # print("countis",self.count)
 
         return decision
 
@@ -216,6 +197,10 @@ class Player:
             # print("blue List recording blue")
             # print(self.blueOccupiedList)
 
+        start_time = time.time()
+        self.evaluation()
+        print("--- %s seconds ---" % (time.time() - start_time))
+
     def evaluation(self):
         """
         evaluate each board state, and return the current value
@@ -237,7 +222,6 @@ class Player:
         print("blue already occupied", self.blueOccupiedList)
         blue_score = self.get_shortest_path("blue")
 
-        # print("evulating state", blue_score - red_score)
         # shortest path, start will be each two sides' coordinates, goal will be the same
         # by using A* search, work out the shortest path's, get this path's steps, minus already occupied cell number.
         # then get the shortest path number.
@@ -246,17 +230,18 @@ class Player:
         return blue_score - red_score
 
     def minimax(self, depth, maximizingPlayer):
-        print("minimax start")
+        # print("minimax start")
         # if current board is has finished(win or lose or draw) or depth is 0 return
+
         moves = self.get_all_possible_moves()
         got_removed = False
         got_removed1 = False
 
         if depth == 0:
-            return 0
+            return self.evaluation()
 
         if maximizingPlayer == "red":
-            max_evaluation = float('-inf')
+            max_evaluation = MIN
 
             for move in moves:
                 self.redOccupiedList.append(move)
@@ -269,11 +254,7 @@ class Player:
                     self.blueStartList[1].remove(move)
                     got_removed1 = True
 
-                evaluation = self.evaluation()
-
-                if evaluation > max_evaluation:
-                    max_evaluation = evaluation
-                    decision = move
+                max_evaluation = max(max_evaluation, self.minimax(depth - 1, "blue"))
 
                 self.redOccupiedList.remove(move)
                 if got_removed:
@@ -283,12 +264,11 @@ class Player:
                     self.blueStartList[1].append(move)
                     got_removed1 = False
 
-            print("max is ", max_evaluation)
-            print("move is", decision)
-            return decision
+            # print("max is ", max_evaluation)
+            return max_evaluation
 
         else:
-            min_evaluation = float('inf')
+            min_evaluation = MAX
 
             for move in moves:
                 self.blueOccupiedList.append(move)
@@ -301,11 +281,7 @@ class Player:
                     self.redStartList[1].remove(move)
                     got_removed1 = True
 
-                evaluation = self.evaluation()
-
-                if evaluation < min_evaluation:
-                    min_evaluation = evaluation
-                    decision = move
+                min_evaluation = min(min_evaluation, self.minimax(depth - 1, "red"))
 
                 self.blueOccupiedList.remove(move)
 
@@ -315,17 +291,73 @@ class Player:
                 if got_removed1:
                     self.redStartList[1].append(move)
                     got_removed1 = False
-            print("min is ", min_evaluation)
-            print("move is ", decision)
-            return decision
+            # print("min is ", min_evaluation)
+            return min_evaluation
+
+    def find_best_move(self):
+        got_removed = False
+        got_removed1 = False
+        moves = self.get_all_possible_moves()
+        if self.color == "red":
+            bestVal = MIN
+            for move in moves:
+                # self.redOccupiedList.append(move)
+
+                if move in self.blueStartList[0]:
+                    self.blueStartList[0].remove(move)
+                    # print(self.blueStartList, self.blueGoalList)
+                    got_removed = True
+                if move in self.blueStartList[1]:
+                    self.blueStartList[1].remove(move)
+                    got_removed1 = True
+
+                moveVal = self.minimax(1, "red")
+
+                if got_removed:
+                    self.blueStartList[0].append(move)
+                    got_removed = False
+                if got_removed1:
+                    self.blueStartList[1].append(move)
+                    got_removed1 = False
+
+                # self.redOccupiedList.remove(move)
+
+                if moveVal > bestVal:
+                    best_move = move
+                    bestVal = moveVal
+        else:
+            bestVal = MAX
+            for move in moves:
+                # self.blueOccupiedList.append(move)
+                if move in self.redStartList[0]:
+                    self.redStartList[0].remove(move)
+                    got_removed = True
+
+                if move in self.redStartList[1]:
+                    self.redStartList[1].remove(move)
+                    got_removed1 = True
+
+                moveVal = self.minimax(0, "blue")
+
+                if got_removed:
+                    self.redStartList[0].append(move)
+                    got_removed = False
+                if got_removed1:
+                    self.redStartList[1].append(move)
+                    got_removed1 = False
+                # self.blueOccupiedList.remove(move)
+
+                if moveVal < bestVal:
+                    bestVal = moveVal
+                    best_move = move
+
+        print("The value of the best Move is :", bestVal)
+        return best_move
 
     def get_shortest_path(self, color):
+        final = MAX
         if color == "red":
 
-            red_path = a_star_search(self.all_nodes, self.redStartList[0][0], self.redGoalList[0][0],
-                                     self.blueOccupiedList)
-            # print("start and goal", self.redStartList[0][0], self.redGoalList[0][0])
-            final = len(red_path)
             for i in range(self.START_BOUND):
                 # print("length of start length",len(self.redStartList[1]))
                 for j in range(len(self.redStartList[i])):
@@ -341,15 +373,11 @@ class Player:
                             final = length
                             red_path = temp_path
 
-            print(red_path)
+            # print(red_path)
             # print("final length", final)
             return final
         else:
 
-            blue_path = a_star_search(self.all_nodes, self.blueStartList[0][0], self.blueGoalList[0][0],
-                                      self.redOccupiedList)
-
-            final = len(blue_path)
             for i in range(self.START_BOUND):
                 for j in range(len(self.blueStartList[i])):
                     for k in range(len(self.blueGoalList[i])):
@@ -362,7 +390,7 @@ class Player:
                         if length < final:
                             final = length
                             blue_path = temp_path
-            print("best path for blue", blue_path)
+            # print("best path for blue", blue_path)
             return final
 
     def get_all_possible_moves(self):
@@ -371,3 +399,10 @@ class Player:
             if (move not in self.redOccupiedList) and (move not in self.blueOccupiedList):
                 result.append(move)
         return result
+
+    def minimax_abpuring(self, depth, player, alpha, beta):
+        moves = self.get_all_possible_moves()
+
+        for move in moves:
+            alpha=max(alpha,min())
+
