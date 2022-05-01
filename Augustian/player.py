@@ -121,15 +121,9 @@ class Player:
         # print("still have this many cells that can be placed", turns_left, len(self.redOccupiedList),len(self.blueOccupiedList))
 
         if self.color == "red":
-            if self.count == 0:
-                decision = ('PLACE', 0, 0)
-                self.count += 1
-            elif self.count == 1:
-                decision = ('PLACE', 1, 3)
-                self.count += 1
-            else:
-                decision = ('PLACE', 0, 3)
-                self.count += 1
+            best_move = self.find_best_move()
+            print(best_move)
+            decision = ('PLACE', best_move[0], best_move[1])
 
         elif self.color == "blue":
             # print("countis",self.count)
@@ -223,95 +217,30 @@ class Player:
 
         """
 
-        print("red already occupied", self.redOccupiedList)
+        # print("red already occupied", self.redOccupiedList)
         red_score = self.get_shortest_path("red", state)
-        print("blue already occupied", self.blueOccupiedList)
+        # print("blue already occupied", self.blueOccupiedList)
         blue_score = self.get_shortest_path("blue", state)
 
         # shortest path, start will be each two sides' coordinates, goal will be the same
         # by using A* search, work out the shortest path's, get this path's steps, minus already occupied cell number.
         # then get the shortest path number.
 
-        print("evulating state", blue_score - red_score)
+        # print("evulating state", blue_score - red_score)
         return blue_score - red_score
-
-    def minimax(self, depth, maximizingPlayer):
-        # print("minimax start")
-        # if current board is has finished(win or lose or draw) or depth is 0 return
-
-        current_state = [self.all_nodes, self.redOccupiedList, self.blueOccupiedList]
-        moves = self.get_all_possible_moves()
-        got_removed = False
-        got_removed1 = False
-
-        if depth == 0:
-            return self.evaluation(current_state)
-
-        if maximizingPlayer == "red":
-            max_evaluation = MIN
-
-            for move in moves:
-                self.redOccupiedList.append(move)
-
-                if move in self.blueStartList[0]:
-                    self.blueStartList[0].remove(move)
-                    # print(self.blueStartList, self.blueGoalList)
-                    got_removed = True
-                if move in self.blueStartList[1]:
-                    self.blueStartList[1].remove(move)
-                    got_removed1 = True
-
-                max_evaluation = max(max_evaluation, self.minimax(depth - 1, "blue"))
-
-                self.redOccupiedList.remove(move)
-                if got_removed:
-                    self.blueStartList[0].append(move)
-                    got_removed = False
-                if got_removed1:
-                    self.blueStartList[1].append(move)
-                    got_removed1 = False
-
-            # print("max is ", max_evaluation)
-            return max_evaluation
-
-        else:
-            min_evaluation = MAX
-
-            for move in moves:
-                self.blueOccupiedList.append(move)
-
-                if move in self.redStartList[0]:
-                    self.redStartList[0].remove(move)
-                    got_removed = True
-
-                if move in self.redStartList[1]:
-                    self.redStartList[1].remove(move)
-                    got_removed1 = True
-
-                min_evaluation = min(min_evaluation, self.minimax(depth - 1, "red"))
-
-                self.blueOccupiedList.remove(move)
-
-                if got_removed:
-                    self.redStartList[0].append(move)
-                    got_removed = False
-                if got_removed1:
-                    self.redStartList[1].append(move)
-                    got_removed1 = False
-            # print("min is ", min_evaluation)
-            return min_evaluation
 
     def find_best_move(self):
         moves = self.get_all_possible_moves()
         current_state = [self.all_nodes, self.redOccupiedList, self.blueOccupiedList]
+
         if self.color == "red":
             bestVal = MIN
             for move in moves:
-                # self.redOccupiedList.append(move)
+                self.redOccupiedList.append(move)
 
-                moveVal = self.minimax_abpuring(current_state, 1, "red", MIN, MAX)
+                moveVal = self.minimax_abpuring(current_state, 2, "blue", MIN, MAX)
 
-                # self.redOccupiedList.remove(move)
+                self.redOccupiedList.remove(move)
 
                 if moveVal > bestVal:
                     best_move = move
@@ -319,11 +248,11 @@ class Player:
         else:
             bestVal = MAX
             for move in moves:
-                # self.blueOccupiedList.append(move)
+                self.blueOccupiedList.append(move)
 
-                moveVal = self.minimax_abpuring(current_state, 1, "blue", MIN, MAX)
+                moveVal = self.minimax_abpuring(current_state, 1, "red", MIN, MAX)
 
-                # self.blueOccupiedList.remove(move)
+                self.blueOccupiedList.remove(move)
 
                 if moveVal < bestVal:
                     bestVal = moveVal
@@ -380,11 +309,12 @@ class Player:
     def minimax_abpuring(self, state, depth, player, alpha, beta):
         got_removed = False
         got_removed1 = False
-        current_state = [self.all_nodes, self.redOccupiedList, self.blueOccupiedList]
+        current_state = state
         moves = self.get_all_possible_moves()
+        score = self.evaluation(current_state)
 
-        if depth == 0:
-            return self.evaluation(state)
+        if depth == 0 or score >= 9999 or score <=-9999:
+            return self.evaluation(current_state)
 
         if player == "red":
             for move in moves:
@@ -399,6 +329,8 @@ class Player:
 
                 self.redOccupiedList.append(move)
 
+                # print("red best,alpha,beta is", best, alpha, beta)
+
                 best = max(best, self.minimax_abpuring(current_state, depth - 1, "blue", alpha, beta))
                 alpha = max(alpha, best)
 
@@ -411,7 +343,8 @@ class Player:
 
                 self.redOccupiedList.remove(move)
 
-                if beta <= alpha:
+                if alpha >= beta:
+                    # print("\nbreak here\n")
                     break
 
             return best
@@ -427,7 +360,7 @@ class Player:
                 if move in self.redGoalList:
                     self.redGoalList.remove(move)
                     got_removed1 = True
-
+                # print("blue best,alpha,beta is", best, alpha, beta)
                 best = min(best, self.minimax_abpuring(current_state, depth - 1, "red", alpha, beta))
                 beta = min(beta, best)
 
@@ -440,7 +373,16 @@ class Player:
                     self.redGoalList.append(move)
                     got_removed1 = False
 
-                if beta < alpha:
+                if alpha >= beta:
+                    # print("\nbreak here\n")
                     break
 
             return best
+
+    def check_game_over(self, state):
+        red_score = self.get_shortest_path("red", state)
+        blue_score = self.get_shortest_path("blue", state)
+        if red_score == 0 or blue_score == 0:
+            return True
+        else:
+            return False
