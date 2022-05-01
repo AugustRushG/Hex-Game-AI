@@ -255,7 +255,7 @@ class Player:
             for start in self.blueStartList:
                 blue_MH_list.append(h_heuristic(piece, goal))
 
-        manhattan_evaluation = min(blue_MH_list)-min(red_MH_list)
+        manhattan_evaluation = (min(blue_MH_list)-len(self.blueOccupiedList))-(min(red_MH_list)-len(self.redOccupiedList))
         return length_evaluation + manhattan_evaluation
 
     def find_best_move(self):
