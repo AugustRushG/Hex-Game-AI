@@ -216,18 +216,47 @@ class Player:
         Returns:
 
         """
+        # find longest connected path
+        """i = 0
+        j = i + 1
+        count = 0
+        while i<self.redOccupiedList
+            if self.redOccupiedList[i+1] == self.redOccupiedList[j]:
+                count = count+1"""
 
-        # print("red already occupied", self.redOccupiedList)
+
+        ''''# print("red already occupied", self.redOccupiedList)
         red_score = self.get_shortest_path("red", state)
         # print("blue already occupied", self.blueOccupiedList)
-        blue_score = self.get_shortest_path("blue", state)
+        blue_score = self.get_shortest_path("blue", state)'''
 
         # shortest path, start will be each two sides' coordinates, goal will be the same
         # by using A* search, work out the shortest path's, get this path's steps, minus already occupied cell number.
         # then get the shortest path number.
 
         # print("evulating state", blue_score - red_score)
-        return blue_score - red_score
+        # return blue_score - red_score
+
+        length_evaluation = len(self.blueOccupiedList)-len(self.redOccupiedList)
+
+        red_MH_list = []
+        blue_MH_list = []
+
+        for piece in self.redOccupiedList:
+            for goal in self.redGoalList:
+                red_MH_list.append(h_heuristic(piece, goal))
+
+            for start in self.redStartList:
+                red_MH_list.append(h_heuristic(piece, start))
+
+        for piece in self.blueOccupiedList:
+            for goal in self.blueGoalList:
+                blue_MH_list.append(h_heuristic(piece, goal))
+            for start in self.blueStartList:
+                blue_MH_list.append(h_heuristic(piece, goal))
+
+        manhattan_evaluation = min(blue_MH_list)-min(red_MH_list)
+        return length_evaluation + manhattan_evaluation
 
     def find_best_move(self):
         moves = self.get_all_possible_moves()
