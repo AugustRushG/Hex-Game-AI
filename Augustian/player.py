@@ -238,7 +238,7 @@ class Player:
             for move in moves:
                 self.redOccupiedList.append(move)
 
-                moveVal = self.minimax_abpuring(current_state, 2, "blue", MIN, MAX)
+                moveVal = self.minimax_abpuring(current_state, 1, "blue", MIN, MAX)
 
                 self.redOccupiedList.remove(move)
 
