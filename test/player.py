@@ -397,12 +397,12 @@ class Player:
         if player == "red":
             for move in moves:
                 best = MIN
-                if move in self.blueStartList[0]:
-                    self.blueStartList[0].remove(move)
+                if move in self.blueStartList:
+                    self.blueStartList.remove(move)
                     # print(self.blueStartList, self.blueGoalList)
                     got_removed = True
-                if move in self.blueStartList[1]:
-                    self.blueStartList[1].remove(move)
+                if move in self.blueGoalList:
+                    self.blueGoalList.remove(move)
                     got_removed1 = True
 
                 self.redOccupiedList.append(move)
@@ -411,10 +411,10 @@ class Player:
                 alpha = max(alpha, best)
 
                 if got_removed:
-                    self.blueStartList[0].append(move)
+                    self.blueStartList.append(move)
                     got_removed = False
                 if got_removed1:
-                    self.blueStartList[1].append(move)
+                    self.blueGoalList.append(move)
                     got_removed1 = False
 
                 self.redOccupiedList.remove(move)
@@ -428,12 +428,12 @@ class Player:
             for move in moves:
                 self.blueOccupiedList.append(move)
 
-                if move in self.redStartList[0]:
-                    self.redStartList[0].remove(move)
+                if move in self.redStartList:
+                    self.redStartList.remove(move)
                     got_removed = True
 
-                if move in self.redStartList[1]:
-                    self.redStartList[1].remove(move)
+                if move in self.redGoalList:
+                    self.redGoalList.remove(move)
                     got_removed1 = True
 
                 best = min(best, self.minimax_abpuring(current_state, depth - 1, "red", alpha, beta))
@@ -442,10 +442,10 @@ class Player:
                 self.blueOccupiedList.remove(move)
 
                 if got_removed:
-                    self.redStartList[0].append(move)
+                    self.redStartList.append(move)
                     got_removed = False
                 if got_removed1:
-                    self.redStartList[1].append(move)
+                    self.redGoalList.append(move)
                     got_removed1 = False
 
                 if beta < alpha:
