@@ -1,17 +1,10 @@
+import numpy as np
+
 from Augustian.node import a_star_search
 import time
 
 MAX = 10000
 MIN = -10000
-
-
-def length_of_path(path, occupied):
-    length = len(path)
-    for coords in path:
-        if coords in occupied:
-            length -= 1
-
-    return length
 
 
 class Player:
@@ -121,9 +114,13 @@ class Player:
         # print("still have this many cells that can be placed", turns_left, len(self.redOccupiedList),len(self.blueOccupiedList))
 
         if self.color == "red":
-            best_move = self.find_best_move()
-            print(best_move)
-            decision = ('PLACE', best_move[0], best_move[1])
+            if self.count==0:
+                decision=('PLACE', 0, 1)
+                self.count+=1
+            else:
+                best_move = self.find_best_move()
+                print(best_move)
+                decision = ('PLACE', best_move[0], best_move[1])
 
         elif self.color == "blue":
             # print("countis",self.count)
@@ -273,7 +270,8 @@ class Player:
                                               state[2])
                     # print(temp_path)
                     if temp_path is not None:
-                        length = length_of_path(temp_path, state[1])
+                        common_elements = np.intersect1d(temp_path, state[1])
+                        length = len(common_elements)
                         # print(length)
                     if length < final:
                         final = length
@@ -291,7 +289,8 @@ class Player:
                                               state[1])
                     if temp_path is not None:
                         # print(temp_path)
-                        length = length_of_path(temp_path, state[2])
+                        common_elements = np.intersect1d(temp_path, state[2])
+                        length = len(common_elements)
 
                     if length < final:
                         final = length
@@ -313,7 +312,7 @@ class Player:
         moves = self.get_all_possible_moves()
         score = self.evaluation(current_state)
 
-        if depth == 0 or score >= 9999 or score <=-9999:
+        if depth == 0 or score >= 9999 or score <= -9999:
             return self.evaluation(current_state)
 
         if player == "red":

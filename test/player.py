@@ -1,18 +1,11 @@
 import time
+import numpy as np
 
 from Augustian.node import a_star_search
 
 MAX = 10000
 MIN = -10000
 
-
-def length_of_path(path, occupied):
-    length = len(path)
-    for coords in path:
-        if coords in occupied:
-            length -= 1
-
-    return length
 
 
 class Player:
@@ -276,7 +269,8 @@ class Player:
                                               state[2])
                     # print(temp_path)
                     if temp_path is not None:
-                        length = length_of_path(temp_path, state[1])
+                        common_elements = np.intersect1d(temp_path, state[1])
+                        length = len(common_elements)
                         # print(length)
                     if length < final:
                         final = length
@@ -294,7 +288,8 @@ class Player:
                                               state[1])
                     if temp_path is not None:
                         # print(temp_path)
-                        length = length_of_path(temp_path, state[2])
+                        common_elements = np.intersect1d(temp_path, state[2])
+                        length = len(common_elements)
 
                     if length < final:
                         final = length
