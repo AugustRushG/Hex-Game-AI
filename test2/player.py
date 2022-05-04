@@ -1,13 +1,31 @@
 import random
 
 import numpy as np
-
+from numpy import array, roll
+from queue import Queue
 from test1.node import a_star_search
 import time
 
 MAX = 10000
 MIN = -10000
+# Utility function to add two coord tuples
+_ADD = lambda a, b: (a[0] + b[0], a[1] + b[1])
 
+# Neighbour hex steps in clockwise order
+_HEX_STEPS = array([(1, -1), (1, 0), (0, 1), (-1, 1), (-1, 0), (0, -1)],
+                   dtype="i,i")
+_PLAYER_AXIS = {
+    "red": 0, # Red aims to form path in r/0 axis
+    "blue": 1 # Blue aims to form path in q/1 axis
+}
+
+# Format: (where to capture, opponent coordinate1, opponent coordinate2
+_CAPTURE_PATTERNS = [[_ADD(n1, n2), n1, n2]
+                     for n1, n2 in
+                     list(zip(_HEX_STEPS, roll(_HEX_STEPS, 1))) +
+                     list(zip(_HEX_STEPS, roll(_HEX_STEPS, 2)))]
+
+_SWAP_PLAYER = {0: 0, 1: 2, 2: 1}
 
 def length_of_path(path, occupied):
     length = len(path)
@@ -136,8 +154,8 @@ class Player:
 
         # put your code here
         decision = ()
-        BadOpeningList = [[0, 0], [0, 1], [1, 0], [self.boardSize, self.boardSize],
-                          [self.boardSize, self.boardSize - 1], [self.boardSize - 1, self.boardSize]]
+        badOpening = [[0, 0], [0, 1], [1, 0], [self.boardSize, self.boardSize],
+                     [self.boardSize-1, self.boardSize], [self.boardSize, self.boardSize-1]]
 
         if self.color == "red":
             if self.count == 0:
@@ -153,10 +171,10 @@ class Player:
 
         elif self.color == "blue":
 
-            if self.count == 0 and self.redOccupiedList[0] not in BadOpeningList:
+            if self.count == 0 and self.redOccupiedList[0] not in badOpening:
                 decision = ('STEAL',)
                 self.count += 1
-            elif self.count == 1 and self.center not in self.redOccupiedList:
+            elif self.count == 0 and self.center not in self.redOccupiedList:
                 decision = ('PLACE', self.center[0], self.center[1])
                 self.count += 1
             else:
@@ -200,7 +218,7 @@ class Player:
                     self.blueGoalList.pop(index)
                 # print("blue list goal", self.blueGoalList)
                 # print("red List recording self")
-                print(self.redOccupiedList)
+                # print(self.redOccupiedList)
         elif self.color == "blue" and player == "red":
 
             self.redOccupiedList.append([action[1], action[2]])
@@ -561,5 +579,86 @@ class Player:
                 return 0
 
 
+    # The following codes are derived from the referee folder
+    # !NOT COMPLETED
 
+    def connected_coords(self, start_coord):
+        """
+        Find connected coordinates from start_coord. This uses the token
+        value of the start_coord cell to determine which other cells are
+        connected (e.g., all will be the same value).
+        """
+        # Get search token type
+        token_type = self._data[start_coord]
 
+        # Use bfs from start coordinate
+        reachable = set()
+        queue = Queue(0)
+        queue.put(start_coord)
+
+        while not queue.empty():
+            curr_coord = queue.get()
+            reachable.add(curr_coord)
+            for coord in self._coord_neighbours(curr_coord):
+                if coord not in reachable and self._data[coord] == token_type:
+                    queue.put(coord)
+
+        return list(reachable)
+
+    def _coord_neighbours(self, coord):
+        """
+        Returns (within-bounds) neighbouring coordinates for given coord.
+        """
+        return [_ADD(coord, step) for step in _HEX_STEPS \
+                if self.inside_bounds(_ADD(coord, step))]
+
+    def _turn_detect_end(self, player, action):
+        """
+        Register that a turn has passed: Update turn counts and detect
+        termination conditions.
+        """
+        # Register turn
+        self.nturns += 1
+        self.history[self.board.digest()] += 1
+
+        # Game end conditions
+
+        # Condition 1: player forms a continuous path spanning board (win).
+        # check reachable coords from just-placed token to detect winning path
+        # NOTE: No point checking this while total turns is less than 2n - 1
+        if self.nturns >= (self.board.n * 2) - 1:
+            _, r, q = action
+            reachable = self.board.connected_coords((r, q))
+            axis_vals = [coord[_PLAYER_AXIS[player]] for coord in reachable]
+            if min(axis_vals) == 0 and max(axis_vals) == self.board.n - 1:
+                self.result = "winner: " + player
+                self.result_cluster = set(reachable)
+                return
+
+    def inside_bounds(self, coord):
+        """
+        True iff coord inside board bounds.
+        """
+        r, q = coord
+        return r >= 0 and r < self.n and q >= 0 and q < self.n
+
+    def capture(self, coord, occupiedList, captureList):
+
+        """
+        Takes in the colour, coordinate of current move, list of occupied cells of the opponent colour
+        and a list to record the captured cells.
+        For current move, check if a capture pattern exists and returns the coordinate needed to capture
+        Derived from _apply_captures function in referee
+        """
+
+        coordToCapture = []
+        for pattern in _CAPTURE_PATTERNS:
+
+            opponent1 = [coord[0] + list(pattern[1])[0], coord[1] + list(pattern[1])[1]]
+            opponent2 = [coord[0] + list(pattern[2])[0], coord[1] + list(pattern[2])[1]]
+
+            if opponent1 in occupiedList and opponent2 in occupiedList:
+                captureList.append([opponent1, opponent2])
+                coordToCapture.append(list(pattern[0]))
+
+        return coordToCapture
