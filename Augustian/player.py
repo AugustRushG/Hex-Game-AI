@@ -1,10 +1,19 @@
 import numpy as np
 
-from Augustian.node import a_star_search
+from Augustian.node import a_star_search,neighbours
 import time
 
 MAX = 10000
 MIN = -10000
+
+
+def length_of_path(path, occupied):
+    length = len(path)
+    for coords in path:
+        if coords in occupied:
+            length -= 1
+
+    return length
 
 
 class Player:
@@ -34,7 +43,6 @@ class Player:
         """
         # put your code here
         self.boardSize = n
-        self.turns_left = n * n
 
         # draw the board
         for x in range(n):
@@ -114,20 +122,25 @@ class Player:
         # print("still have this many cells that can be placed", turns_left, len(self.redOccupiedList),len(self.blueOccupiedList))
 
         if self.color == "red":
-            if self.count==0:
-                decision=('PLACE', 0, 1)
-                self.count+=1
+            if self.count == 0:
+                decision = ('PLACE', 0, 0)
+                self.count += 1
             else:
                 best_move = self.find_best_move()
                 print(best_move)
                 decision = ('PLACE', best_move[0], best_move[1])
 
         elif self.color == "blue":
-            # print("countis",self.count)
-            best_move = self.find_best_move()
-            print(best_move)
-            decision = ('PLACE', best_move[0], best_move[1])
-            # print("countis",self.count)
+
+            if self.count == 0:
+                decision = ('STEAL',)
+                self.count += 1
+            else:
+                # print("countis",self.count)
+                best_move = self.find_best_move()
+                print(best_move)
+                decision = ('PLACE', best_move[0], best_move[1])
+                # print("countis",self.count)
 
         return decision
 
@@ -145,18 +158,22 @@ class Player:
         # put your code here
         print("self color", self.color)
         print("player color", player)
+        print("action is ", action)
 
         if self.color == "red" and player == "red":
-            self.redOccupiedList.append([action[1], action[2]])
+            if action[0] == 'STEAL':
+                self.redOccupiedList.pop()
+            else:
+                self.redOccupiedList.append([action[1], action[2]])
 
-            if [action[1], action[2]] in self.blueStartList:
-                self.blueStartList.remove([action[1], action[2]])
-                # print("blue list start", self.blueStartList)
-            if [action[1], action[2]] in self.blueGoalList:
-                self.blueGoalList.remove([action[1], action[2]])
+                if [action[1], action[2]] in self.blueStartList:
+                    self.blueStartList.remove([action[1], action[2]])
+                    # print("blue list start", self.blueStartList)
+                if [action[1], action[2]] in self.blueGoalList:
+                    self.blueGoalList.remove([action[1], action[2]])
                 # print("blue list goal", self.blueGoalList)
-            # print("red List recording self")
-            # print(self.redOccupiedList)
+                # print("red List recording self")
+                # print(self.redOccupiedList)
         elif self.color == "blue" and player == "red":
             self.redOccupiedList.append([action[1], action[2]])
             # print(self.blueStartList[1])
@@ -171,31 +188,52 @@ class Player:
             # print("blue List recording red")
             # print(self.redOccupiedList)
         elif self.color == "red" and player == "blue":
-            self.blueOccupiedList.append([action[1], action[2]])
-
-            # if blue placed at my goal or start cell, remove this cell from the list
-            if [action[1], action[2]] in self.redStartList:
-                self.redStartList.remove([action[1], action[2]])
+            if action[0] == 'STEAL':
+                self.blueOccupiedList.append(self.redOccupiedList[-1])
+                if len(self.blueStartList) != self.boardSize:
+                    self.blueStartList.append(self.redOccupiedList[-1])
+                if len(self.blueGoalList) != self.boardSize:
+                    self.blueGoalList.append(self.redOccupiedList[-1])
+                self.redOccupiedList.pop()
+            else:
+                self.blueOccupiedList.append([action[1], action[2]])
+                # if blue placed at my goal or start cell, remove this cell from the list
+                if [action[1], action[2]] in self.redStartList:
+                    self.redStartList.remove([action[1], action[2]])
                 # print("red list start and goal", self.redStartList, self.redGoalList)
-            if [action[1], action[2]] in self.redGoalList:
-                self.redGoalList.remove([action[1], action[2]])
+                if [action[1], action[2]] in self.redGoalList:
+                    self.redGoalList.remove([action[1], action[2]])
 
-            # print("red List recording blue")
-            # print(self.blueOccupiedList)
+                # print("red List recording blue")
+                # print(self.blueOccupiedList)
         else:
-            self.blueOccupiedList.append([action[1], action[2]])
+            if action[0] == 'STEAL':
+                self.blueOccupiedList.append(self.redOccupiedList[-1])
+                if len(self.blueStartList) != self.boardSize:
+                    self.blueStartList.append(self.redOccupiedList[-1])
+                if len(self.blueGoalList) != self.boardSize:
+                    self.blueGoalList.append(self.redOccupiedList[-1])
+                if self.redOccupiedList[-1] in self.redStartList:
+                    self.redStartList.remove(self.redOccupiedList[-1])
+                    # print("blue list start and goal", self.blueStartList, self.blueGoalList)
+                if self.redOccupiedList[-1] in self.redGoalList:
+                    self.redGoalList.remove(self.redOccupiedList[-1])
+                self.redOccupiedList.pop()
 
-            if [action[1], action[2]] in self.redStartList:
-                self.redStartList.remove([action[1], action[2]])
-                # print("blue list start and goal", self.blueStartList, self.blueGoalList)
-            if [action[1], action[2]] in self.redGoalList:
-                self.redGoalList.remove([action[1], action[2]])
-                # print("blue list start and goal", self.blueStartList, self.blueGoalList)
-            # print("blue List recording blue")
-            # print(self.blueOccupiedList)
+            else:
+                self.blueOccupiedList.append([action[1], action[2]])
+
+                if [action[1], action[2]] in self.redStartList:
+                    self.redStartList.remove([action[1], action[2]])
+                    # print("blue list start and goal", self.blueStartList, self.blueGoalList)
+                if [action[1], action[2]] in self.redGoalList:
+                    self.redGoalList.remove([action[1], action[2]])
+                    # print("blue list start and goal", self.blueStartList, self.blueGoalList)
+                # print("blue List recording blue")
+                # print(self.blueOccupiedList)
 
         start_time = time.time()
-        self.evaluation([self.all_nodes, self.redOccupiedList, self.blueOccupiedList])
+        print("evaluation is ", self.evaluation([self.all_nodes, self.redOccupiedList, self.blueOccupiedList]))
         print("--- %s seconds ---" % (time.time() - start_time))
 
     def evaluation(self, state):
@@ -214,10 +252,17 @@ class Player:
 
         """
 
+        if len(state[2]) == 0 and len(state[1]) > 0:
+            return 1
+        if len(state[1]) == 0 and len(state[2]) > 0:
+            return -1
+
         # print("red already occupied", self.redOccupiedList)
         red_score = self.get_shortest_path("red", state)
+
         # print("blue already occupied", self.blueOccupiedList)
         blue_score = self.get_shortest_path("blue", state)
+        # print("red score is blue score is", red_score, blue_score)
 
         # shortest path, start will be each two sides' coordinates, goal will be the same
         # by using A* search, work out the shortest path's, get this path's steps, minus already occupied cell number.
@@ -229,15 +274,31 @@ class Player:
     def find_best_move(self):
         moves = self.get_all_possible_moves()
         current_state = [self.all_nodes, self.redOccupiedList, self.blueOccupiedList]
+        got_removed = False
+        got_removed1 = False
+
 
         if self.color == "red":
             bestVal = MIN
             for move in moves:
+                if move in self.blueStartList:
+                    self.blueStartList.remove(move)
+                    # print(self.blueStartList, self.blueGoalList)
+                    got_removed = True
+                if move in self.blueGoalList:
+                    self.blueGoalList.remove(move)
+                    got_removed1 = True
                 self.redOccupiedList.append(move)
 
-                moveVal = self.minimax_abpuring(current_state, 1, "blue", MIN, MAX)
+                moveVal = self.minimax_abpuring(current_state, 0, "blue", MIN, MAX)
 
                 self.redOccupiedList.remove(move)
+                if got_removed:
+                    self.blueStartList.append(move)
+                    got_removed = False
+                if got_removed1:
+                    self.blueGoalList.append(move)
+                    got_removed1 = False
 
                 if moveVal > bestVal:
                     best_move = move
@@ -246,10 +307,24 @@ class Player:
             bestVal = MAX
             for move in moves:
                 self.blueOccupiedList.append(move)
+                if move in self.redStartList:
+                    self.redStartList.remove(move)
+                    got_removed = True
 
-                moveVal = self.minimax_abpuring(current_state, 1, "red", MIN, MAX)
+                if move in self.redGoalList:
+                    self.redGoalList.remove(move)
+                    got_removed1 = True
+
+                moveVal = self.minimax_abpuring(current_state, 0, "red", MIN, MAX)
 
                 self.blueOccupiedList.remove(move)
+
+                if got_removed:
+                    self.redStartList.append(move)
+                    got_removed = False
+                if got_removed1:
+                    self.redGoalList.append(move)
+                    got_removed1 = False
 
                 if moveVal < bestVal:
                     bestVal = moveVal
@@ -263,15 +338,19 @@ class Player:
         length = MAX
         if color == "red":
             # print("redstart list, red goal list ",self.redStartList,self.redGoalList)
+            if len(state[1]) == 1 and len(state[2]) == 0:
+                return self.boardSize - 1
             for j in range(len(self.redStartList)):
                 for k in range(len(self.redGoalList)):
-                    # print("start is ,goal is ", self.redStartList[i][j], self.redGoalList[i][k])
+                    # print("start is ,goal is ", self.redStartList[j], self.redGoalList[k])
+                    # print("start timing")
+                    # start_time = time.time()
                     temp_path = a_star_search(state[0], self.redStartList[j], self.redGoalList[k],
                                               state[2])
+                    # print("--- %s seconds ---" % (time.time() - start_time))
                     # print(temp_path)
                     if temp_path is not None:
-                        common_elements = np.intersect1d(temp_path, state[1])
-                        length = len(common_elements)
+                        length = length_of_path(temp_path, state[1])
                         # print(length)
                     if length < final:
                         final = length
@@ -284,13 +363,14 @@ class Player:
         else:
             for j in range(len(self.blueStartList)):
                 for k in range(len(self.blueGoalList)):
-                    # print("start is ,goal is ", self.blueStartList[i][j], self.blueGoalList[i][k])
+                    # print("start is ,goal is ", self.blueStartList[j], self.blueGoalList[k])
                     temp_path = a_star_search(state[0], self.blueStartList[j], self.blueGoalList[k],
                                               state[1])
                     if temp_path is not None:
                         # print(temp_path)
-                        common_elements = np.intersect1d(temp_path, state[2])
-                        length = len(common_elements)
+                        length = length_of_path(temp_path, state[2])
+
+                        # print(length)
 
                     if length < final:
                         final = length
