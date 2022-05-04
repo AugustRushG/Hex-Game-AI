@@ -678,3 +678,4 @@ class Player:
                 captureList.append([opponent1, opponent2])
 
         return captureList
+
