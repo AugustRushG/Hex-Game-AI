@@ -36,7 +36,6 @@ class Player:
         """
         Called once at the beginning of a game to initialise this player.
         Set up an internal representation of the game state.
-
         The parameter player is the string "red" if your player will
         play as Red, or the string "blue" if your player will play
         as Blue.
@@ -150,7 +149,6 @@ class Player:
         their chosen action. Update your internal representation of the
         game state based on this. The parameter action is the chosen
         action itself.
-
         Note: At the end of your player's turn, the action parameter is
         the same as what your player returned from the action method
         above. However, the referee has validated it at this point.
@@ -240,16 +238,11 @@ class Player:
         """
         evaluate each board state, and return the current value
         negative means good for blue, positive means good for red
-
         the goal of the game is to create an unbroken chain of hexes that connect to the opposing sides of the board,
         so it would be good to calculate the shortest paths between the opposing sides
-
-
         Args:
             state:
-
         Returns:
-
         """
 
         if len(state[2]) == 0 and len(state[1]) > 0:
