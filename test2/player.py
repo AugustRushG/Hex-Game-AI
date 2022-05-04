@@ -642,14 +642,30 @@ class Player:
         r, q = coord
         return r >= 0 and r < self.n and q >= 0 and q < self.n
 
+    def aggressive_capture(self, coord, occupiedList, captureList):
 
-    def capture(coord, selfOccupiedList, oppOccupiedList):
         """
         Takes in the colour, coordinate of current move, list of occupied cells of the opponent colour
         and a list to record the captured cells.
         For current move, check if a capture pattern exists and returns the coordinate needed to capture
         Derived from _apply_captures function in referee
         """
+
+        coordToCapture = []
+        for pattern in _CAPTURE_PATTERNS:
+
+            opponent1 = [coord[0] + list(pattern[1])[0], coord[1] + list(pattern[1])[1]]
+            opponent2 = [coord[0] + list(pattern[2])[0], coord[1] + list(pattern[2])[1]]
+
+            if opponent1 in occupiedList and opponent2 in occupiedList:
+                captureList.append([opponent1, opponent2])
+                coordToCapture.append(list(pattern[0]))
+
+        return coordToCapture
+
+    def find_capture(coord, selfOccupiedList, oppOccupiedList):
+        """Function to find pieces that have been captured,
+        given the occupied list of red and blue and the current coordinate"""
 
         captureList = []
 
@@ -662,7 +678,3 @@ class Player:
                 captureList.append([opponent1, opponent2])
 
         return captureList
-
-
-
-
