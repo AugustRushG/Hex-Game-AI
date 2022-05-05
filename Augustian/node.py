@@ -32,6 +32,7 @@ def a_star_search(board, start, goal, occupied_list):
     start_node.g = start_node.h = start_node.f = 0
     end_node = Node(None, goal)
     end_node.g = end_node.h = end_node.f = 0
+    iterate_count=0
 
     open_list = []
     close_list = []
@@ -40,6 +41,8 @@ def a_star_search(board, start, goal, occupied_list):
 
     # as long as the unvisited list is not null, keep iterate through
     while len(open_list) > 0:
+        if iterate_count > len(board):
+            return None
         current_node = open_list[0]
         current_index = 0
 
@@ -85,7 +88,7 @@ def a_star_search(board, start, goal, occupied_list):
                     continue
             if child not in close_list:
                 open_list.append(child)
-
+        iterate_count += 1
 
 # connect to these nodes' neighbour
 def neighbours(node, all_nodes):

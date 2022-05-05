@@ -23,7 +23,7 @@ class Player:
     color = ""
     boardSize = 0
     all_nodes = []
-    count = 0
+    count = 1
 
     def __init__(self, player, n):
         """
@@ -147,7 +147,7 @@ class Player:
         # put your code here
         print("self color", self.color)
         print("player color", player)
-        print("action is ",action)
+        print("action is ", action)
 
         if self.color == "red" and player == "red":
             if action[0] == 'STEAL':
@@ -156,71 +156,88 @@ class Player:
                 self.redOccupiedList.append([action[1], action[2]])
 
                 if [action[1], action[2]] in self.blueStartList:
-                    self.blueStartList.remove([action[1], action[2]])
+                    index = self.blueStartList.index([action[1], action[2]])
+                    self.blueStartList.pop(index)
+                    self.blueGoalList.pop(index)
                     # print("blue list start", self.blueStartList)
                 if [action[1], action[2]] in self.blueGoalList:
-                    self.blueGoalList.remove([action[1], action[2]])
+                    index = self.blueGoalList.index([action[1], action[2]])
+                    self.blueStartList.pop(index)
+                    self.blueGoalList.pop(index)
                 # print("blue list goal", self.blueGoalList)
                 # print("red List recording self")
                 # print(self.redOccupiedList)
         elif self.color == "blue" and player == "red":
+
             self.redOccupiedList.append([action[1], action[2]])
             # print(self.blueStartList[1])
             # print(action)
             if [action[1], action[2]] in self.blueStartList:
-                self.blueStartList.remove([action[1], action[2]])
-                # print("blue list start and goal", self.blueStartList, self.blueGoalList)
+                index = self.blueStartList.index([action[1], action[2]])
+                self.blueStartList.pop(index)
+                self.blueGoalList.pop(index)
+                # print("blue list start", self.blueStartList)
             if [action[1], action[2]] in self.blueGoalList:
-                self.blueGoalList.remove([action[1], action[2]])
-                # print("blue list start and goal", self.blueStartList, self.blueGoalList)
+                index = self.blueGoalList.index([action[1], action[2]])
+                self.blueStartList.pop(index)
+                self.blueGoalList.pop(index)
 
             # print("blue List recording red")
             # print(self.redOccupiedList)
         elif self.color == "red" and player == "blue":
             if action[0] == 'STEAL':
-                self.blueOccupiedList.append(self.redOccupiedList[-1])
+                self.blueOccupiedList.append([self.redOccupiedList[-1][-1], self.redOccupiedList[-1][0]])
                 if len(self.blueStartList) != self.boardSize:
-                    self.blueStartList.append(self.redOccupiedList[-1])
+                    self.blueStartList.append([self.redOccupiedList[-1][-1], self.redOccupiedList[-1][0]])
                 if len(self.blueGoalList) != self.boardSize:
-                    self.blueGoalList.append(self.redOccupiedList[-1])
+                    self.blueGoalList.append([self.redOccupiedList[-1][0], self.boardSize - 1])
                 self.redOccupiedList.pop()
             else:
                 self.blueOccupiedList.append([action[1], action[2]])
                 # if blue placed at my goal or start cell, remove this cell from the list
                 if [action[1], action[2]] in self.redStartList:
-                    self.redStartList.remove([action[1], action[2]])
+                    index = self.redStartList.index([action[1], action[2]])
+                    self.redStartList.pop(index)
+                    self.redGoalList.pop(index)
                 # print("red list start and goal", self.redStartList, self.redGoalList)
                 if [action[1], action[2]] in self.redGoalList:
-                    self.redGoalList.remove([action[1], action[2]])
+                    index = self.redGoalList.index([action[1], action[2]])
+                    self.redStartList.pop(index)
+                    self.redGoalList.pop(index)
 
                 # print("red List recording blue")
                 # print(self.blueOccupiedList)
         else:
             if action[0] == 'STEAL':
-                self.blueOccupiedList.append(self.redOccupiedList[-1])
+                self.blueOccupiedList.append([self.redOccupiedList[-1][-1],self.redOccupiedList[-1][0]])
                 if len(self.blueStartList) != self.boardSize:
-                    self.blueStartList.append(self.redOccupiedList[-1])
+                    self.blueStartList.append([self.redOccupiedList[-1][-1],self.redOccupiedList[-1][0]])
                 if len(self.blueGoalList) != self.boardSize:
-                    self.blueGoalList.append(self.redOccupiedList[-1])
+                    self.blueGoalList.append([self.redOccupiedList[-1][0], self.boardSize - 1])
+
                 if self.redOccupiedList[-1] in self.redStartList:
-                    self.redStartList.remove(self.redOccupiedList[-1])
-                    # print("blue list start and goal", self.blueStartList, self.blueGoalList)
-                if self.redOccupiedList[-1] in self.redGoalList:
-                    self.redGoalList.remove(self.redOccupiedList[-1])
+                    index = self.redStartList.index(self.redOccupiedList[-1])
+
+                    self.redStartList.pop(index)
+                    self.redGoalList.pop(index)
+
+                # print("red start and goal is ",self.redStartList,self.redGoalList)
                 self.redOccupiedList.pop()
 
             else:
                 self.blueOccupiedList.append([action[1], action[2]])
 
                 if [action[1], action[2]] in self.redStartList:
-                    self.redStartList.remove([action[1], action[2]])
-                    # print("blue list start and goal", self.blueStartList, self.blueGoalList)
+                    index = self.redStartList.index([action[1], action[2]])
+                    self.redStartList.pop(index)
+                    self.redGoalList.pop(index)
+                # print("red list start and goal", self.redStartList, self.redGoalList)
                 if [action[1], action[2]] in self.redGoalList:
-                    self.redGoalList.remove([action[1], action[2]])
-                    # print("blue list start and goal", self.blueStartList, self.blueGoalList)
-                # print("blue List recording blue")
-                # print(self.blueOccupiedList)
-        start_time = time.time()
+                    index = self.redGoalList.index([action[1], action[2]])
+                    self.redStartList.pop(index)
+                    self.redGoalList.pop(index)
+
+
 
     def find_best_move(self):
         moves = self.get_all_possible_moves()
