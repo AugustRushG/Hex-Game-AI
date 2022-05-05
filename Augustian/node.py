@@ -41,7 +41,7 @@ def a_star_search(board, start, goal, occupied_list):
 
     # as long as the unvisited list is not null, keep iterate through
     while len(open_list) > 0:
-        if iterate_count > len(board):
+        if iterate_count > len(board) - len(occupied_list):
             return None
         current_node = open_list[0]
         current_index = 0
