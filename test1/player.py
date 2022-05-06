@@ -402,6 +402,7 @@ class Player:
         best_move = []
 
         if self.boardSize < 7:
+            level = 2
             all_cells = moves
         else:
             cells_around = neighbours(self.blueOccupiedList[-1], self.all_nodes, self.redOccupiedList,
@@ -409,6 +410,7 @@ class Player:
                            + neighbours(self.redOccupiedList[-1], self.all_nodes, self.redOccupiedList,
                                         self.blueOccupiedList)
             all_cells = cells_around
+            level = 1
 
         """
          for i in range(len(self.blueOccupiedList)):
@@ -422,7 +424,11 @@ class Player:
         # cells nearby the last placed cell.
         if self.color == "red":
             bestVal = MIN
-            for move in moves:
+            for move in all_cells:
+                capture_list = self.detect_capture(move, self.redOccupiedList, self.blueOccupiedList)
+                if len(capture_list) != 0:
+                    best_move = move
+                    return best_move
                 if move in self.blueStartList:
                     index = self.blueStartList.index(move)
                     self.blueStartList.pop(index)
@@ -457,7 +463,11 @@ class Player:
                     bestVal = moveVal
         else:
             bestVal = MAX
-            for move in moves:
+            for move in all_cells:
+                capture_list = self.detect_capture(move, self.redOccupiedList, self.blueOccupiedList)
+                if len(capture_list) != 0:
+                    best_move = move
+                    return best_move
                 self.blueOccupiedList.append(move)
                 if move in self.redStartList:
                     index = self.redStartList.index(move)
