@@ -381,7 +381,7 @@ class Player:
         # cells nearby the last placed cell.
         if self.color == "red":
             bestVal = MIN
-            for move in all_cells:
+            for move in moves:
                 if move in self.blueStartList:
                     index = self.blueStartList.index(move)
                     self.blueStartList.pop(index)
@@ -416,7 +416,7 @@ class Player:
                     bestVal = moveVal
         else:
             bestVal = MAX
-            for move in all_cells:
+            for move in moves:
                 self.blueOccupiedList.append(move)
                 if move in self.redStartList:
                     index = self.redStartList.index(move)
