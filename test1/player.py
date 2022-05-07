@@ -55,17 +55,11 @@ def neighbours(node, all_nodes, red_occupied_list, blue_occupied_list):
 
 def neighbours_2(node, all_nodes, red_occupied_list, blue_occupied_list):
     dirs = [[1, -1],  # up left
-            [2, -2],
             [1, 0],  # up right
-            [2, 0],
             [0, -1],  # left
-            [0, -2],
             [0, 1],  # right
-            [0, 2],
             [-1, 0],  # down left
-            [-2, 0],
-            [-1, 1],
-            [-2, 2],
+            [-1, 1],  # down right
             [2, -1],
             [1, -2],
             [-1, -1],
@@ -194,11 +188,10 @@ class Player:
             elif self.count == 1 and self.center not in self.blueOccupiedList and self.boardSize >= 7:
                 decision = ('PLACE', self.center[0], self.center[1])
             elif self.count == 2:
-                for neighbour in neighbours(self.center, self.all_nodes, self.redOccupiedList, self.blueOccupiedList):
+                for neighbour in neighbours_2(self.center, self.all_nodes, self.redOccupiedList, self.blueOccupiedList):
                     decision = ('PLACE', neighbour[0], neighbour[1])
                     self.count += 1
                     return decision
-
             else:
                 best_move = self.find_best_move()
                 print(best_move)
@@ -212,7 +205,7 @@ class Player:
                 if self.center not in self.redOccupiedList:
                     decision = ('PLACE', self.center[0], self.center[1])
                 else:
-                    for neighbour in neighbours(self.center, self.all_nodes, self.redOccupiedList,
+                    for neighbour in neighbours_2(self.center, self.all_nodes, self.redOccupiedList,
                                                 self.blueOccupiedList):
                         decision = ('PLACE', neighbour[0], neighbour[1])
                         self.count += 1
@@ -405,9 +398,9 @@ class Player:
             level = 2
             all_cells = moves
         else:
-            cells_around = neighbours(self.blueOccupiedList[-1], self.all_nodes, self.redOccupiedList,
+            cells_around = neighbours_2(self.blueOccupiedList[-1], self.all_nodes, self.redOccupiedList,
                                       self.blueOccupiedList) \
-                           + neighbours(self.redOccupiedList[-1], self.all_nodes, self.redOccupiedList,
+                           + neighbours_2(self.redOccupiedList[-1], self.all_nodes, self.redOccupiedList,
                                         self.blueOccupiedList)
             all_cells = cells_around
             level = 1
@@ -464,10 +457,12 @@ class Player:
         else:
             bestVal = MAX
             for move in all_cells:
-                capture_list = self.detect_capture(move, self.redOccupiedList, self.blueOccupiedList)
+                capture_list = self.detect_capture(move, self.blueOccupiedList, self.redOccupiedList)
                 if len(capture_list) != 0:
+                    print(capture_list)
                     best_move = move
                     return best_move
+
                 self.blueOccupiedList.append(move)
                 if move in self.redStartList:
                     index = self.redStartList.index(move)
