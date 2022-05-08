@@ -184,7 +184,7 @@ class Player:
         if self.color == "red":
             if self.count == 0:
 
-                decision = ('PLACE', 0, 0)
+                decision = ('PLACE', 0, self.boardSize-2)  # best strategical opening move
             elif self.count == 1 and self.center not in self.blueOccupiedList and self.boardSize >= 7:
                 decision = ('PLACE', self.center[0], self.center[1])
             elif self.count == 2:
@@ -400,7 +400,7 @@ class Player:
                                     self.blueOccupiedList)
         all_cells = cells_around
 
-        if self.boardSize <= 10:
+        if self.boardSize <= 8:
             level = 1
 
         else:
