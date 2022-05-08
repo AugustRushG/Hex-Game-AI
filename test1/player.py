@@ -394,16 +394,17 @@ class Player:
         got_removed1 = False
         best_move = []
 
-        if self.boardSize < 7:
-            level = 2
-            all_cells = moves
-        else:
-            cells_around = neighbours_2(self.blueOccupiedList[-1], self.all_nodes, self.redOccupiedList,
-                                      self.blueOccupiedList) \
-                           + neighbours_2(self.redOccupiedList[-1], self.all_nodes, self.redOccupiedList,
-                                        self.blueOccupiedList)
-            all_cells = cells_around
+        cells_around = neighbours(self.blueOccupiedList[-1], self.all_nodes, self.redOccupiedList,
+                                  self.blueOccupiedList) \
+                       + neighbours(self.redOccupiedList[-1], self.all_nodes, self.redOccupiedList,
+                                    self.blueOccupiedList)
+        all_cells = cells_around
+
+        if self.boardSize <= 10:
             level = 1
+
+        else:
+            level = 0
 
         """
          for i in range(len(self.blueOccupiedList)):
@@ -439,7 +440,7 @@ class Player:
                     got_removed1 = True
                 self.redOccupiedList.append(move)
 
-                moveVal = self.minimax_abpuring(current_state, 0, "blue", MIN, MAX)
+                moveVal = self.minimax_abpuring(current_state, level, "blue", MIN, MAX)
 
                 self.redOccupiedList.remove(move)
                 if got_removed:
@@ -480,7 +481,7 @@ class Player:
                     self.redGoalList.pop(index)
                     got_removed1 = True
 
-                moveVal = self.minimax_abpuring(current_state, 0, "red", MIN, MAX)
+                moveVal = self.minimax_abpuring(current_state, level, "red", MIN, MAX)
 
                 self.blueOccupiedList.remove(move)
 
