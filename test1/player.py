@@ -400,7 +400,7 @@ class Player:
                                     self.blueOccupiedList)
         all_cells = cells_around
 
-        if self.boardSize <= 8:
+        if self.boardSize <= 7:
             level = 1
 
         else:
