@@ -143,7 +143,7 @@ class Player:
             self.blueStartList = start_list
             self.blueGoalList = goal_list
 
-            print("red move")
+            # print("red move")
 
         else:
             self.color = "blue"
@@ -171,7 +171,7 @@ class Player:
             self.redStartList = start_list
             self.redGoalList = goal_list
 
-            print("blue move")
+            # print("blue move")
 
     def action(self):
         """
@@ -189,14 +189,14 @@ class Player:
 
         if self.color == "red":
             best_move = self.find_best_move()
-            print(best_move)
+            # print(best_move)
             decision = ('PLACE', best_move[0], best_move[1])
 
 
 
         elif self.color == "blue":
             best_move = self.find_best_move()
-            print(best_move)
+            # print(best_move)
             decision = ('PLACE', best_move[0], best_move[1])
             self.count += 1
 
@@ -214,9 +214,9 @@ class Player:
         above. However, the referee has validated it at this point.
         """
         # put your code here
-        print("self color", self.color)
-        print("player color", player)
-        print("action is ", action)
+        # print("self color", self.color)
+        # print("player color", player)
+        # print("action is ", action)
 
         if self.color == "red" and player == "red":
             if action[0] == 'STEAL':
@@ -274,7 +274,7 @@ class Player:
                 self.redOccupiedList.pop()
             else:
                 capture_list = self.detect_capture([action[1], action[2]], self.blueOccupiedList, self.redOccupiedList)
-                print(capture_list)
+                # (capture_list)
                 for pair in capture_list:
                     for coords in pair:
                         if coords in self.redOccupiedList:
@@ -332,8 +332,8 @@ class Player:
 
         # print(self.redOccupiedList)
         start_time = time.time()
-        print("evaluation is ", self.evaluation([self.all_nodes, self.redOccupiedList, self.blueOccupiedList]))
-        print("--- %s seconds ---" % (time.time() - start_time))
+        # print("evaluation is ", self.evaluation([self.all_nodes, self.redOccupiedList, self.blueOccupiedList]))
+        # print("--- %s seconds ---" % (time.time() - start_time))
 
     def evaluation(self, state):
         """
@@ -460,11 +460,11 @@ class Player:
                     bestVal = moveVal
                     best_move = move
 
-        print("The value of the best Move is :", bestVal)
+        # print("The value of the best Move is :", bestVal)
 
         if len(best_move) == 0:
-            print(moves)
-            print(self.redOccupiedList, "\n", self.blueOccupiedList)
+            # print(moves)
+            # print(self.redOccupiedList, "\n", self.blueOccupiedList)
             return random.choice(neighbours_2(self.center, self.all_nodes, self.redOccupiedList, self.blueOccupiedList))
 
         return best_move
