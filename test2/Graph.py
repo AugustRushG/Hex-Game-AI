@@ -46,3 +46,14 @@ class Graph:
         return False
 
 
+if self.count < self.boardSize / 2:
+    tempStartList = []
+    tempGoalList = []
+    tempStartList.append(self.redStartList[int(len(self.redStartList) / 2)])
+    tempGoalList.append(self.redGoalList[int(len(self.redGoalList) / 2)])
+
+    for i in range(self.count):
+        tempStartList.append(self.redStartList[int(len(self.redStartList) / 2) + i])
+        tempStartList.append(self.redStartList[int(len(self.redStartList) / 2) - i])
+        tempGoalList.append(self.redGoalList[int(len(self.redGoalList) / 2) + i])
+        tempGoalList.append(self.redGoalList[int(len(self.redGoalList) / 2) - i])
